@@ -77,7 +77,7 @@ var playState = {
 
         //trackin area
         var perfectAreaPoint = {x: this.sp_hiteArea.x, y: this.sp_hiteArea.y};
-        var areaJson = [-50, 0, 40, 80, 120, 200];
+        var areaJson = [-50, 0, 50, 70, 100, 130];
         var trackingAreas = [];
         for (var _index in areaJson) {
             var x = 0, width = 0;
@@ -90,26 +90,30 @@ var playState = {
                 break;
             }
             var _trackingArea = game.add.bitmapData(width, 150);
-            _trackingArea.fill(_index * 50, _index*20, 0, 0.8);
+            _trackingArea.fill(_index * 50, _index * 20, 0, 0.8);
             var _sp_trackingArea = game.add.sprite(x, perfectAreaPoint.y, _trackingArea);
             game.physics.arcade.enable(_sp_trackingArea);
             trackingAreas.push(_sp_trackingArea);
             //0: miss, 1: good, 2: perfect, 3: good, 4: miss
         }
         this.trackingAreas = {};
-        this.trackingAreas.good = [trackingAreas[1],trackingAreas[3]];
+        this.trackingAreas.good = [trackingAreas[1], trackingAreas[3]];
         this.trackingAreas.perfect = [trackingAreas[2]];
         this.trackingAreas.miss = [trackingAreas[4]];
         this.trackingAreas.recycle = [trackingAreas[0]];
         (function (_this) {
             setInterval(function () {
                 emitMusicalNotes.call(_this);
-            }, 1000);
+            }, 400);
         })(this);
     },
     update: function () {
         //init
-        checkTap.call(this, this.sp_musicalNotes, null, null,  this.trackingAreas.recycle);
+        if (this.sp_musicalNotes) {
+            this.sp_musicalNotes.forEachAlive(function (item) {
+                checkTap.call(this, item, null, null, this.trackingAreas.recycle);
+            }, this);
+        }
     },
     render: function () {
         if (game.global.showDebug) {
@@ -121,8 +125,19 @@ var playState = {
         this.sp_musicStage.animations.play('musicStageBeat');
         this.sp_hiteArea.animations.play('hiteAreaBeat');
         this.sound_beat.play();
-
-        checkTap.call(this, this.sp_musicalNotes, this.trackingAreas.good, this.trackingAreas.perfect, this.trackingAreas.miss);
+        if (this.sp_musicalNotes) {
+            var x = this.world.width;
+            var targetIndex = 0;
+            var cLength =this.sp_musicalNotes.children.length;
+            for (var i = 0; i < cLength; i++) {
+                var _item = this.sp_musicalNotes.children[i];
+                if(_item.alive && Math.min(x, _item.x) < x){
+                    x = _item.x;
+                    targetIndex = i;
+                }
+            }
+            checkTap.call(this, this.sp_musicalNotes.getAt(targetIndex), this.trackingAreas.good, this.trackingAreas.perfect, this.trackingAreas.miss);
+        }
     },
     hit: function () {
 
@@ -139,16 +154,28 @@ var playState = {
 };
 
 var emitMusicalNotes = function () {
+    if (!this.sp_musicalNotes) {
+        this.sp_musicalNotes = game.add.group();
+        this.sp_musicalNotes.enableBody = true;
+        this.sp_musicalNotes.createMultiple(30, 'note');
+    }
+
     //musical notes
-    this.sp_musicalNotes = this.sp_musicalNotes || [];
-    var sp_note = game.add.sprite(1000, 290, 'note');
-    game.physics.arcade.enable(sp_note);
+    var sp_note = this.sp_musicalNotes.getFirstDead();
+    if (!sp_note) {
+        return;
+    }
+
+//    this.sp_musicalNotes = this.sp_musicalNotes || [];
+//    var sp_note = game.add.sprite(1000, 290, 'note');
+    sp_note.reset(game.world.width, 290);
     sp_note.anchor.setTo(0.5, 0.5);
+    sp_note.body.setSize(1, 1);
     sp_note.enableBody = true;
+    game.physics.arcade.enable(sp_note);
     sp_note.body.velocity.x = -500;
     sp_note.outOfBoundsKill = true;
-    sp_note.body.setSize(1, 1);
-    this.sp_musicalNotes.push(sp_note);
+//    this.sp_musicalNotes.push(sp_note);
 };
 
 var checkTap = function (note, goodArea, perfectArea, missArea) {
