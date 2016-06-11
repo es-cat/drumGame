@@ -1,1 +1,0 @@
-[Sun Jul 26 2015 00:32:30 GMT+0800 (CST)] layer "point_hit_unhit.png 拷貝": Expected end of input but "\u62F7" found.

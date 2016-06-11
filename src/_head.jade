@@ -1,0 +1,51 @@
+doctype
+//- TODO: Don't forget to set lang !!
+
+block pageinfo
+    - var page = { title: '太股打人',desc:'一直打一直打一直打',image:'' }
+
+html
+    head    
+        //- TODO: Check if it's the good charset
+        meta(charset='utf-8')
+        meta(http-equiv='X-UA-Compatible', content='edge,chrome=1')
+        title #{page.title}
+        meta(name='description', content='#{page.desc}')
+
+        meta(name='viewport', content='initial-scale=1 maximum-scale=1 user-scalable=0 minimal-ui')
+        meta(name='mobile-web-app-capable', content='yes')
+        meta(name='apple-mobile-web-app-capable', content='yes')
+        meta(name='HandheldFriendly', content='true')
+
+
+        // Schema.org markup for Google+
+        meta(itemprop="name" content="#{page.title}")
+        meta(itemprop="description" content="#{page.desc}")
+        meta(itemprop="image" content="#{page.image}")
+
+        // og
+        meta(property="og:title" content="#{page.title}")
+        meta(property="og:description" content="#{page.desc}")
+        meta(property="og:site_name" content="一起來玩WebGL")
+        meta(property="og:type" content="article")
+        meta(property="og:image" content="#{page.image}")
+
+        //- TODO : Place favicon.ico and apple-touch-icon.png in the root directory
+        //- link(rel="Shortcut Icon" type="images/x-icon" href="../images/fav.ico")
+        style(type='text/css').
+            @import url(http://fonts.googleapis.com/css?family=Bangers);
+            @import url(http://fonts.googleapis.com/css?family=Righteous);
+            * {
+            margin: 0;
+            padding: 0;
+            }
+            body,#gameDiv {
+            height: 100vh;
+            }
+            .hiddenCommb {
+            font-family: 'Righteous', cursive;
+            visibility: hidden;
+            }
+
+        link(rel='stylesheet', href='css/main.css')
+        script(src="js/phaser.min.js")
