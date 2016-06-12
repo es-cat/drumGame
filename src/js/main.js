@@ -1,6 +1,76 @@
+
+var com = {};
+com.checkTap = function (game) {
+    var _this = this;
+    this.game = game;
+    this.check = function (state, note, goodArea, perfectArea, missArea) {
+        this.game.physics.arcade.overlap(note, missArea, checkMiss, null, state);
+        this.game.physics.arcade.overlap(note, goodArea, checkGood, null, state);
+        this.game.physics.arcade.overlap(note, perfectArea, checkPerfect, null, state);
+    };
+    this.tapAction = {
+        good: function () {
+
+        },
+        perfect: function () {
+
+        },
+        miss: function () {
+
+        }
+    };
+    this.takeScore = {
+        good: function () {
+
+        },
+        perfect: function () {
+
+        },
+        miss: function () {
+
+        }
+    };
+    this.effectRender = {
+        good: function (note) {
+            this.hit();
+            note.kill();
+        },
+        perfect: function (note) {
+            this.hit();
+            note.kill();
+        },
+        miss: function (note) {
+            game.global.combCount = -1;
+            this.miss();
+            note.kill();
+        }
+    };
+    function checkGood(note, area) {
+        _this.tapAction.good.call(this, note);
+        _this.takeScore.good.call(this, note);
+        _this.effectRender.good.call(this, note);
+        console.log('Good');
+    };
+    function checkPerfect(note, area) {
+        _this.tapAction.perfect.call(this, note);
+        _this.takeScore.perfect.call(this, note);
+        _this.effectRender.perfect.call(this, note);
+        console.log('Perfect');
+    };
+    function checkMiss(note, area) {
+        _this.tapAction.miss.call(this, note);
+        _this.takeScore.miss.call(this, note);
+        _this.effectRender.miss.call(this, note);
+        console.log('miss');
+    };
+    return this;
+};
+
 // We initialising Phaser
 // Initialise Phaser
+
 var game = new Phaser.Game(1024, 768, Phaser.AUTO, 'gameDiv');
+var cm_checkTap = new com.checkTap(game);
 game.global = {
     score: 0,
     showDebug: false,
@@ -14,7 +84,6 @@ var playState = {
     preload: function () {
         game.stage.backgroundColor = '#d1d1d1';
         document.body.style.backgroundColor = "#000";
-
         game.load.spritesheet('musicStage', 'images/music_stage_all.png', 1024, 179);
         game.load.spritesheet('hiteArea', 'images/hite_area_all.png', 123, 123);
         game.load.spritesheet('pointBarIcon', 'images/point_hit_all.png', 72, 72);
@@ -26,8 +95,6 @@ var playState = {
         game.load.image('good', 'images/good.png');
         game.load.audio('beat', ['assets/normal-hitnormal.mp3', 'assets/normal-hitnormal.ogg']);
         game.load.spritesheet('note', 'images/icon_left.png', 91, 91);
-
-
     },
     create: function () {
         game.physics.startSystem(Phaser.Physics.ARCADE);
@@ -153,7 +220,7 @@ var playState = {
         //init
         if (this.sp_musicalNotes) {
             this.sp_musicalNotes.forEachAlive(function (item) {
-                checkTap.call(this, item, null, null, this.trackingAreas.recycle);
+                cm_checkTap.check(this, item, null, null, this.trackingAreas.recycle);
             }, this);
         }
     },
@@ -180,7 +247,7 @@ var playState = {
                     targetIndex = i;
                 }
             }
-            checkTap.call(this, this.sp_musicalNotes.getAt(targetIndex), this.trackingAreas.good, this.trackingAreas.perfect, this.trackingAreas.miss);
+            cm_checkTap.check(this, this.sp_musicalNotes.getAt(targetIndex), this.trackingAreas.good, this.trackingAreas.perfect, this.trackingAreas.miss);
         }
     },
     miss:function(){
@@ -267,91 +334,35 @@ var playState = {
                 .start();
     }
 };
-        var emitMusicalNotes = function () {
-            if (!this.sp_musicalNotes) {
-                this.sp_musicalNotes = game.add.group();
-                this.sp_musicalNotes.enableBody = true;
-                this.sp_musicalNotes.createMultiple(30, 'note');
-            }
 
-            //musical notes
-            var sp_note = this.sp_musicalNotes.getFirstDead();
-            if (!sp_note) {
-                return;
-            }
-
-//    this.sp_musicalNotes = this.sp_musicalNotes || [];
-//    var sp_note = game.add.sprite(1000, 290, 'note');
-            sp_note.reset(game.world.width, 290);
-            sp_note.anchor.setTo(0.5, 0.5);
-            sp_note.body.setSize(1, 1);
-            sp_note.enableBody = true;
-            game.physics.arcade.enable(sp_note);
-            sp_note.body.velocity.x = -500;
-            sp_note.outOfBoundsKill = true;
-//    this.sp_musicalNotes.push(sp_note);
-        };
-
-var checkTap = function (note, goodArea, perfectArea, missArea) {
-    game.physics.arcade.overlap(note, missArea, checkTap.checkMiss, null, this);
-    game.physics.arcade.overlap(note, goodArea, checkTap.checkGood, null, this);
-    game.physics.arcade.overlap(note, perfectArea, checkTap.checkPerfect, null, this);
-};
-checkTap.tapAction = {
-    good: function () {
-
-    },
-    perfect: function () {
-
-    },
-    miss: function () {
-
+var emitMusicalNotes = function () {
+    if (!this.sp_musicalNotes) {
+        this.sp_musicalNotes = game.add.group();
+        this.sp_musicalNotes.enableBody = true;
+        this.sp_musicalNotes.createMultiple(30, 'note');
     }
-};
-checkTap.takeScore = {
-    good: function () {
 
-    },
-    perfect: function () {
-
-    },
-    miss: function () {
-
+    //musical notes
+    var sp_note = this.sp_musicalNotes.getFirstDead();
+    if (!sp_note) {
+        return;
     }
-};
-checkTap.effectRender = {
-    good: function (note) {
-        this.hit();
-        note.kill();
-    },
-    perfect: function (note) {
-        this.hit();
-        note.kill();
-    },
-    miss: function (note) {
-        game.global.combCount = -1;
-        this.miss();
-        note.kill();
-    }
-};
-checkTap.checkGood = function (note, area) {
-    checkTap.tapAction.good.call(this, note);
-    checkTap.takeScore.good.call(this, note);
-    checkTap.effectRender.good.call(this, note);
-    console.log('Good');
-};
-checkTap.checkPerfect = function (note, area) {
-    checkTap.tapAction.perfect.call(this, note);
-    checkTap.takeScore.perfect.call(this, note);
-    checkTap.effectRender.perfect.call(this, note);
-    console.log('Perfect');
-};
-checkTap.checkMiss = function (note, area) {
-    checkTap.tapAction.miss.call(this, note);
-    checkTap.takeScore.miss.call(this, note);
-    checkTap.effectRender.miss.call(this, note);
-    console.log('miss');
+
+    //this.sp_musicalNotes = this.sp_musicalNotes || [];
+    //var sp_note = game.add.sprite(1000, 290, 'note');
+    sp_note.reset(game.world.width, 290);
+    sp_note.anchor.setTo(0.5, 0.5);
+    sp_note.body.setSize(1, 1);
+    sp_note.enableBody = true;
+    game.physics.arcade.enable(sp_note);
+    sp_note.body.velocity.x = -500;
+    sp_note.outOfBoundsKill = true;
+    //this.sp_musicalNotes.push(sp_note);
 };
 
+
+//game.state.add('boot', playState);
+//game.state.add('menu', playState);
 game.state.add('play', playState);
+//game.state.add('end', playState);
 game.state.start('play');
