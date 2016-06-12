@@ -1,11 +1,3 @@
-var game = new Phaser.Game(1024, 768, Phaser.AUTO, 'gameDiv');
-game.global = {
-    score: 0,
-    showDebug: false,
-    combCount: 0,
-    point: 0
-};
-
 var menuState = {
 	preload:function(){
 		game.stage.backgroundColor = '#84ccc9';
@@ -26,6 +18,9 @@ var menuState = {
 
 	},
 	create:function(){
+		//置中
+        game.scale.pageAlignHorizontally = true;
+        game.scale.pageAlignVertically = true;
 		//logo
 		var logo = game.add.image(game.world.centerX,game.world.centerY,'logo');
 		logo.anchor.setTo(0.5,0.5);
@@ -86,6 +81,9 @@ var menuState = {
 		}
 
     	this.sound_beat.play();
+    	setTimeout(function(){
+			game.state.start('play');
+    	},300);
 
 	},
 	update:function(){
@@ -94,5 +92,5 @@ var menuState = {
 };
 
 
-game.state.add('menu', menuState);
-game.state.start('menu');
+//game.state.add('menu', menuState);
+//game.state.start('menu');
